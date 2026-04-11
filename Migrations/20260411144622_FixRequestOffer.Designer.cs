@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SoftSolutions.Database;
 
@@ -11,9 +12,11 @@ using SoftSolutions.Database;
 namespace SoftSolutions.Migrations
 {
     [DbContext(typeof(DB))]
-    partial class DBModelSnapshot : ModelSnapshot
+    [Migration("20260411144622_FixRequestOffer")]
+    partial class FixRequestOffer
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -181,10 +184,10 @@ namespace SoftSolutions.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<decimal>("CommissionAmount")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<double?>("CommissionAmount")
+                        .HasColumnType("float");
 
-                    b.Property<decimal>("CommissionPercentage")
+                    b.Property<decimal?>("CommissionPercentage")
                         .HasPrecision(18, 4)
                         .HasColumnType("decimal(18,4)");
 
@@ -210,8 +213,8 @@ namespace SoftSolutions.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("ProviderEarning")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<double?>("ProviderEarning")
+                        .HasColumnType("float");
 
                     b.Property<int>("ServiceRequestId")
                         .HasColumnType("int");
@@ -220,8 +223,8 @@ namespace SoftSolutions.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<double?>("TotalAmount")
+                        .HasColumnType("float");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");

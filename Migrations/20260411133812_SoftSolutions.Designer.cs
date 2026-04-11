@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SoftSolutions.Database;
 
@@ -11,9 +12,11 @@ using SoftSolutions.Database;
 namespace SoftSolutions.Migrations
 {
     [DbContext(typeof(DB))]
-    partial class DBModelSnapshot : ModelSnapshot
+    [Migration("20260411133812_SoftSolutions")]
+    partial class SoftSolutions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -181,10 +184,10 @@ namespace SoftSolutions.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<decimal>("CommissionAmount")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<double?>("CommissionAmount")
+                        .HasColumnType("float");
 
-                    b.Property<decimal>("CommissionPercentage")
+                    b.Property<decimal?>("CommissionPercentage")
                         .HasPrecision(18, 4)
                         .HasColumnType("decimal(18,4)");
 
@@ -210,8 +213,8 @@ namespace SoftSolutions.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("ProviderEarning")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<double?>("ProviderEarning")
+                        .HasColumnType("float");
 
                     b.Property<int>("ServiceRequestId")
                         .HasColumnType("int");
@@ -220,8 +223,8 @@ namespace SoftSolutions.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<double?>("TotalAmount")
+                        .HasColumnType("float");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -382,47 +385,6 @@ namespace SoftSolutions.Migrations
                     b.HasIndex("ServiceId");
 
                     b.ToTable("ProviderServices");
-                });
-
-            modelBuilder.Entity("SoftSolutions.Models.RequestOffer", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<decimal>("OfferedPrice")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("ProviderId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RequestId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(max)")
-                        .HasDefaultValue("Pending");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProviderId");
-
-                    b.HasIndex("RequestId");
-
-                    b.ToTable("RequestOffers");
                 });
 
             modelBuilder.Entity("SoftSolutions.Models.Review", b =>
@@ -828,25 +790,6 @@ namespace SoftSolutions.Migrations
                     b.Navigation("Provider");
 
                     b.Navigation("Service");
-                });
-
-            modelBuilder.Entity("SoftSolutions.Models.RequestOffer", b =>
-                {
-                    b.HasOne("SoftSolutions.Models.User", "Provider")
-                        .WithMany()
-                        .HasForeignKey("ProviderId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("SoftSolutions.Models.ServiceRequest", "ServiceRequest")
-                        .WithMany()
-                        .HasForeignKey("RequestId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Provider");
-
-                    b.Navigation("ServiceRequest");
                 });
 
             modelBuilder.Entity("SoftSolutions.Models.Review", b =>
