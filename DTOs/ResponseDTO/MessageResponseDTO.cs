@@ -1,6 +1,6 @@
 ﻿namespace SoftSolutions.DTOs.ResponseDTO
 {
-    public class MessageResponseDTO:BaseModelResponseDTO
+    public class MessageResponseDTO
     {
         public int SenderId { get; set; }
         public string SenderName { get; set; }   // ⭐ ADD (UI ke liye)

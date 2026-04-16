@@ -1,6 +1,6 @@
 ﻿namespace SoftSolutions.DTOs.ResponseDTO
 {
-    public class ServiceResponseDTO:BaseModelResponseDTO
+    public class ServiceResponseDTO
     {
         public string Title { get; set; }
         public decimal? BasePrice { get; set; }

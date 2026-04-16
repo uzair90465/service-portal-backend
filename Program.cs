@@ -1,23 +1,84 @@
+
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 using SoftSolutions.Database;
 using SoftSolutions.Mapping;
 
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-builder.Services.AddDbContext<DB>(DbContextOptions => DbContextOptions.UseSqlServer(builder.Configuration.GetConnectionString("SqlConnection")));
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// ✅ DB Connection
+builder.Services.AddDbContext<DB>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("SqlConnection")));
 
+// ✅ AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile));
+
+// ✅ Controllers
+builder.Services.AddControllers();
+
+// ✅ Swagger with JWT 🔐
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Description = "Enter JWT like: Bearer {your token}"
+    });
+
+    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
+
+// ✅ CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        policy => policy
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader());
+});
+
+// ✅ 🔥 JWT Authentication
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = "SoftSolutions",
+            ValidAudience = "SoftSolutionsUsers",
+            IssuerSigningKey = new SymmetricSecurityKey(
+    Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        };
+    });
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// ✅ Swagger
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -26,7 +87,19 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
+// ✅ CORS
+app.UseCors("AllowAll");
+
+app.Use(async (context, next) =>
+{
+    var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+    Console.WriteLine($"Token received: {token ?? "NONE"}");
+    await next();
+});
+
+// ✅ 🔥 IMPORTANT ORDER
+app.UseAuthentication();   // 👈 FIRST
+app.UseAuthorization();    // 👈 SECOND
 
 app.MapControllers();
 

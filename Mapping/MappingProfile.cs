@@ -38,13 +38,16 @@ namespace SoftSolutions.Mapping
 
             CreateMap<ProviderProfileRequestDTO, ProviderProfile>();
 
-             //================= SERVICE REQUEST =================
+            //================= SERVICE REQUEST =================
+            //Console.WriteLine(savedRequest.Service?.Title);
+            //Console.WriteLine(savedRequest.Location?.Name);
             CreateMap<ServiceRequest, ServiceRequestResponseDTO>()
-                .ForMember(dest => dest.ServiceTitle,
-                    opt => opt.MapFrom(src => src.Service.Title))
-                .ForMember(dest => dest.LocationName,
-                    opt => opt.MapFrom(src => src.Location.Name));
-
+    .ForMember(dest => dest.ServiceTitle,
+        opt => opt.MapFrom(src => src.Service.Title))
+    .ForMember(dest => dest.LocationName,
+        opt => opt.MapFrom(src => src.Location.Name))
+    .ForMember(dest => dest.UserId,
+        opt => opt.MapFrom(src => src.UserId)); // ADD THIS LINE
             CreateMap<ServiceRequestRequestDTO, ServiceRequest>();
 
             // ================= ORDER =================
@@ -84,6 +87,23 @@ namespace SoftSolutions.Mapping
 
             CreateMap<Location, LocationResponseDTO>();
             CreateMap<LocationRequestDTO, Location>();
+
+
+
+            // Provider Profile
+            CreateMap<ProviderProfile, ProviderProfileResponseDTO>()
+                .ForMember(dest => dest.UserName,
+                    opt => opt.MapFrom(src => src.User.Name));
+
+            CreateMap<ProviderProfileRequestDTO, ProviderProfile>();
+
+            // Provider Service
+            CreateMap<ProviderService, ProviderServiceResponseDTO>();
+            CreateMap<ProviderServiceRequestDTO, ProviderService>();
+
+            // Provider Location
+            CreateMap<ProviderLocation, ProviderLocationResponseDTO>();
+            CreateMap<ProviderLocationRequestDTO, ProviderLocation>();
 
 
 

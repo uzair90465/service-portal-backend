@@ -1,6 +1,6 @@
 ﻿namespace SoftSolutions.DTOs.ResponseDTO
 {
-    public class OrderResponseDTO:BaseModelResponseDTO
+    public class OrderResponseDTO
     {
         public int ServiceRequestId { get; set; }
         public double? TotalAmount { get; set; }

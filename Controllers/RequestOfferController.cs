@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SoftSolutions.Database;
+using Microsoft.AspNetCore.Authorization;
 using SoftSolutions.DTOs.RequestDTO;
 using SoftSolutions.DTOs.ResponseDTO;
 using SoftSolutions.Models;
@@ -8,6 +9,7 @@ using AutoMapper;
 
 namespace SoftSolutions.Controllers
 {
+    [AllowAnonymous]
     [Route("api/[controller]")]
     [ApiController]
     public class RequestOfferController : ControllerBase
@@ -21,23 +23,20 @@ namespace SoftSolutions.Controllers
             _mapper = mapper;
         }
 
-        // ================= CREATE OFFER (PROVIDER) =================
+        // ================= CREATE OFFER =================
         [HttpPost]
         public async Task<IActionResult> CreateOffer(RequestOfferRequestDTO dto)
         {
             var offer = _mapper.Map<RequestOffer>(dto);
-
             offer.Status = "Pending";
-
             _context.RequestOffers.Add(offer);
             await _context.SaveChangesAsync();
 
             var result = _mapper.Map<RequestOfferResponseDTO>(offer);
-
             return Ok(result);
         }
 
-        // ================= GET OFFERS BY REQUEST (USER SIDE) =================
+        // ================= GET OFFERS BY REQUEST =================
         [HttpGet("request/{requestId}")]
         public async Task<IActionResult> GetOffersByRequest(int requestId)
         {
@@ -47,11 +46,10 @@ namespace SoftSolutions.Controllers
                 .ToListAsync();
 
             var result = _mapper.Map<List<RequestOfferResponseDTO>>(offers);
-
             return Ok(result);
         }
 
-        // ================= ACCEPT OFFER (USER SELECTS PROVIDER) 💣 =================
+        // ================= ACCEPT OFFER =================
         [HttpPost("accept/{offerId}")]
         public async Task<IActionResult> AcceptOffer(int offerId)
         {
@@ -62,7 +60,6 @@ namespace SoftSolutions.Controllers
             if (offer == null)
                 return NotFound("Offer not found");
 
-            // reject all other offers of same request
             var otherOffers = await _context.RequestOffers
                 .Where(o => o.RequestId == offer.RequestId)
                 .ToListAsync();
@@ -72,15 +69,9 @@ namespace SoftSolutions.Controllers
                 o.Status = (o.Id == offerId) ? "Accepted" : "Rejected";
             }
 
-            // update request status
             offer.ServiceRequest.Status = "Accepted";
 
-            // ================= CREATE ORDER AUTOMATICALLY 💣 =================
-            if (offer == null)
-                return NotFound();
-
             var price = offer.OfferedPrice;
-
             var order = new Order
             {
                 ServiceRequestId = offer.RequestId,
@@ -93,7 +84,6 @@ namespace SoftSolutions.Controllers
             };
 
             _context.Orders.Add(order);
-
             await _context.SaveChangesAsync();
 
             return Ok(new
@@ -108,15 +98,57 @@ namespace SoftSolutions.Controllers
         public async Task<IActionResult> RejectOffer(int offerId)
         {
             var offer = await _context.RequestOffers.FindAsync(offerId);
-
             if (offer == null)
                 return NotFound();
 
             offer.Status = "Rejected";
+            await _context.SaveChangesAsync();
+            return Ok("Offer rejected");
+        }
 
+        // ================= GET ALL OFFERS =================
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var offers = await _context.RequestOffers
+                .Include(o => o.Provider)
+                .Include(o => o.ServiceRequest)
+                .OrderByDescending(o => o.CreatedAt)
+                .ToListAsync();
+            var result = _mapper.Map<List<RequestOfferResponseDTO>>(offers);
+            return Ok(result);
+        }
+
+        // ================= UPDATE OFFER =================
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, RequestOfferRequestDTO dto)
+        {
+            var offer = await _context.RequestOffers.FindAsync(id);
+            if (offer == null) return NotFound();
+
+            if (offer.Status != "Pending")
+                return BadRequest("Cannot update offer after it has been accepted or rejected.");
+
+            _mapper.Map(dto, offer);
             await _context.SaveChangesAsync();
 
-            return Ok("Offer rejected");
+            var result = _mapper.Map<RequestOfferResponseDTO>(offer);
+            return Ok(result);
+        }
+
+        // ================= DELETE OFFER =================
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var offer = await _context.RequestOffers.FindAsync(id);
+            if (offer == null) return NotFound();
+
+            if (offer.Status == "Accepted")
+                return BadRequest("Cannot delete an accepted offer.");
+
+            _context.RequestOffers.Remove(offer);
+            await _context.SaveChangesAsync();
+            return Ok("Offer deleted successfully");
         }
     }
 }

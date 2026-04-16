@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using SoftSolutions.Database;
 using SoftSolutions.DTOs.RequestDTO;
 using SoftSolutions.DTOs.ResponseDTO;
@@ -8,6 +9,7 @@ using AutoMapper;
 
 namespace SoftSolutions.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ServiceRequestController : ControllerBase
@@ -21,23 +23,42 @@ namespace SoftSolutions.Controllers
             _mapper = mapper;
         }
 
-        // ================= CREATE REQUEST (USER) =================
+        // ================= CREATE REQUEST =================
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> Create(ServiceRequestRequestDTO dto)
         {
             var request = _mapper.Map<ServiceRequest>(dto);
-
             request.Status = "Pending";
-
             _context.ServiceRequests.Add(request);
             await _context.SaveChangesAsync();
 
-            var result = _mapper.Map<ServiceRequestResponseDTO>(request);
+            var savedRequest = await _context.ServiceRequests
+                .Include(r => r.Service)
+                .Include(r => r.Location)
+                .FirstOrDefaultAsync(r => r.Id == request.Id);
 
+            var result = _mapper.Map<ServiceRequestResponseDTO>(savedRequest);
             return Ok(result);
         }
 
-        // ================= GET ALL REQUESTS (USER SIDE) =================
+        // ================= GET ALL =================
+        [AllowAnonymous]
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var requests = await _context.ServiceRequests
+                .Include(r => r.Service)
+                .Include(r => r.Location)
+                .Include(r => r.User)
+                .ToListAsync();
+
+            var result = _mapper.Map<List<ServiceRequestResponseDTO>>(requests);
+            return Ok(result);
+        }
+
+        // ================= GET BY USER =================
+        [AllowAnonymous]
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetByUser(int userId)
         {
@@ -48,21 +69,19 @@ namespace SoftSolutions.Controllers
                 .ToListAsync();
 
             var result = _mapper.Map<List<ServiceRequestResponseDTO>>(requests);
-
             return Ok(result);
         }
 
-        // ================= GET FOR PROVIDER (SMART FILTER) =================
+        // ================= GET FOR PROVIDER =================
+        [AllowAnonymous]
         [HttpGet("provider/{providerId}")]
         public async Task<IActionResult> GetForProvider(int providerId)
         {
-            // step 1: get provider services
             var providerServices = await _context.ProviderServices
                 .Where(p => p.ProviderId == providerId)
                 .Select(p => p.ServiceId)
                 .ToListAsync();
 
-            // step 2: filter requests
             var requests = await _context.ServiceRequests
                 .Include(r => r.Service)
                 .Include(r => r.Location)
@@ -73,24 +92,57 @@ namespace SoftSolutions.Controllers
                 .ToListAsync();
 
             var result = _mapper.Map<List<ServiceRequestResponseDTO>>(requests);
-
             return Ok(result);
         }
 
-        // ================= UPDATE STATUS (OPTIONAL CONTROL) =================
+        // ================= UPDATE STATUS =================
+        [AllowAnonymous]
         [HttpPut("{id}/status")]
         public async Task<IActionResult> UpdateStatus(int id, string status)
         {
             var request = await _context.ServiceRequests.FindAsync(id);
-
             if (request == null)
                 return NotFound();
 
             request.Status = status;
+            await _context.SaveChangesAsync();
+            return Ok("Status updated");
+        }
 
+        // ================= UPDATE REQUEST =================
+        [AllowAnonymous]
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, ServiceRequestRequestDTO dto)
+        {
+            var request = await _context.ServiceRequests.FindAsync(id);
+            if (request == null)
+                return NotFound();
+
+            if (request.Status != "Pending")
+                return BadRequest("Cannot edit a request that is already accepted or in progress.");
+
+            _mapper.Map(dto, request);
             await _context.SaveChangesAsync();
 
-            return Ok("Status updated");
+            var result = _mapper.Map<ServiceRequestResponseDTO>(request);
+            return Ok(result);
+        }
+
+        // ================= DELETE REQUEST =================
+        [AllowAnonymous]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var request = await _context.ServiceRequests.FindAsync(id);
+            if (request == null)
+                return NotFound();
+
+            if (request.Status == "Accepted")
+                return BadRequest("Cannot delete an accepted request.");
+
+            _context.ServiceRequests.Remove(request);
+            await _context.SaveChangesAsync();
+            return Ok("Service request deleted successfully");
         }
     }
 }
