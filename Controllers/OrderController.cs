@@ -22,13 +22,35 @@ namespace SoftSolutions.Controllers
             _mapper = mapper;
         }
 
+        //[HttpGet]
+        //public async Task<IActionResult> GetAll()
+        //{
+        //    var orders = await _context.Orders
+        //        .Include(o => o.ServiceRequest)
+        //        .ToListAsync();
+        //    var result = _mapper.Map<List<OrderResponseDTO>>(orders);
+        //    return Ok(result);
+        //}
+
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
             var orders = await _context.Orders
                 .Include(o => o.ServiceRequest)
                 .ToListAsync();
-            var result = _mapper.Map<List<OrderResponseDTO>>(orders);
+
+            var result = orders.Select(o => new OrderResponseDTO
+            {
+                Id = o.Id,
+                ServiceRequestId = o.ServiceRequestId,
+                TotalAmount = (double?)o.TotalAmount,
+                CommissionPercentage = o.CommissionPercentage,
+                CommissionAmount = (double?)o.CommissionAmount,
+                ProviderEarning = (double?)o.ProviderEarning,
+                PaymentStatus = o.PaymentStatus,
+                Status = o.Status
+            }).ToList();
+
             return Ok(result);
         }
 
@@ -44,6 +66,18 @@ namespace SoftSolutions.Controllers
             return Ok(result);
         }
 
+        //[HttpGet("user/{userId}")]
+        //public async Task<IActionResult> GetByUser(int userId)
+        //{
+        //    var orders = await _context.Orders
+        //        .Include(o => o.ServiceRequest)
+        //        .Where(o => o.ServiceRequest.UserId == userId)
+        //        .ToListAsync();
+        //    var result = _mapper.Map<List<OrderResponseDTO>>(orders);
+        //    return Ok(result);
+        //}
+
+
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetByUser(int userId)
         {
@@ -51,9 +85,51 @@ namespace SoftSolutions.Controllers
                 .Include(o => o.ServiceRequest)
                 .Where(o => o.ServiceRequest.UserId == userId)
                 .ToListAsync();
-            var result = _mapper.Map<List<OrderResponseDTO>>(orders);
+
+            var result = orders.Select(o => new OrderResponseDTO
+            {
+                Id = o.Id,
+                ServiceRequestId = o.ServiceRequestId,
+                TotalAmount = (double?)o.TotalAmount,
+                CommissionPercentage = o.CommissionPercentage,
+                CommissionAmount = (double?)o.CommissionAmount,
+                ProviderEarning = (double?)o.ProviderEarning,
+                PaymentStatus = o.PaymentStatus,
+                Status = o.Status
+            }).ToList();
+
             return Ok(result);
         }
+
+
+        [HttpGet("provider/{providerId}")]
+        public async Task<IActionResult> GetByProvider(int providerId)
+        {
+            var acceptedOfferRequestIds = await _context.RequestOffers
+                .Where(o => o.ProviderId == providerId && o.Status == "Accepted")
+                .Select(o => o.RequestId)
+                .ToListAsync();
+
+            var orders = await _context.Orders
+                .Include(o => o.ServiceRequest)
+                .Where(o => acceptedOfferRequestIds.Contains(o.ServiceRequestId))
+                .ToListAsync();
+
+            var result = orders.Select(o => new OrderResponseDTO
+            {
+                Id = o.Id,
+                ServiceRequestId = o.ServiceRequestId,
+                TotalAmount = (double?)o.TotalAmount,
+                CommissionPercentage = o.CommissionPercentage,
+                CommissionAmount = (double?)o.CommissionAmount,
+                ProviderEarning = (double?)o.ProviderEarning,
+                PaymentStatus = o.PaymentStatus,
+                Status = o.Status
+            }).ToList();
+
+            return Ok(result);
+        }
+
 
         [HttpPut("{id}/status")]
         public async Task<IActionResult> UpdateStatus(int id, string status)

@@ -23,7 +23,6 @@ namespace SoftSolutions.Controllers
             _mapper = mapper;
         }
 
-        // ================= ADD REVIEW =================
         [HttpPost]
         public async Task<IActionResult> CreateReview(ReviewRequestDTO dto)
         {
@@ -51,7 +50,6 @@ namespace SoftSolutions.Controllers
             return Ok(result);
         }
 
-        // ================= GET REVIEWS BY ORDER =================
         [HttpGet("order/{orderId}")]
         public async Task<IActionResult> GetByOrder(int orderId)
         {
@@ -66,7 +64,6 @@ namespace SoftSolutions.Controllers
             return Ok(result);
         }
 
-        // ================= GET ALL REVIEWS =================
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -97,7 +94,6 @@ namespace SoftSolutions.Controllers
             return Ok(result);
         }
 
-        // ================= UPDATE REVIEW =================
         [HttpPut("{orderId}")]
         public async Task<IActionResult> Update(int orderId, ReviewRequestDTO dto)
         {
@@ -112,7 +108,6 @@ namespace SoftSolutions.Controllers
             return Ok(result);
         }
 
-        // ================= DELETE REVIEW =================
         [HttpDelete("{orderId}")]
         public async Task<IActionResult> Delete(int orderId)
         {

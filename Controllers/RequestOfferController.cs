@@ -23,7 +23,6 @@ namespace SoftSolutions.Controllers
             _mapper = mapper;
         }
 
-        // ================= CREATE OFFER =================
         [HttpPost]
         public async Task<IActionResult> CreateOffer(RequestOfferRequestDTO dto)
         {
@@ -36,7 +35,6 @@ namespace SoftSolutions.Controllers
             return Ok(result);
         }
 
-        // ================= GET OFFERS BY REQUEST =================
         [HttpGet("request/{requestId}")]
         public async Task<IActionResult> GetOffersByRequest(int requestId)
         {
@@ -49,7 +47,6 @@ namespace SoftSolutions.Controllers
             return Ok(result);
         }
 
-        // ================= ACCEPT OFFER =================
         [HttpPost("accept/{offerId}")]
         public async Task<IActionResult> AcceptOffer(int offerId)
         {
@@ -93,7 +90,6 @@ namespace SoftSolutions.Controllers
             });
         }
 
-        // ================= REJECT OFFER =================
         [HttpPost("reject/{offerId}")]
         public async Task<IActionResult> RejectOffer(int offerId)
         {
@@ -106,7 +102,6 @@ namespace SoftSolutions.Controllers
             return Ok("Offer rejected");
         }
 
-        // ================= GET ALL OFFERS =================
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -119,7 +114,6 @@ namespace SoftSolutions.Controllers
             return Ok(result);
         }
 
-        // ================= UPDATE OFFER =================
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, RequestOfferRequestDTO dto)
         {
@@ -136,7 +130,6 @@ namespace SoftSolutions.Controllers
             return Ok(result);
         }
 
-        // ================= DELETE OFFER =================
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

@@ -23,16 +23,18 @@ namespace SoftSolutions.Controllers
             _mapper = mapper;
         }
 
-        // ================= CREATE REQUEST =================
         [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> Create(ServiceRequestRequestDTO dto)
         {
             var request = _mapper.Map<ServiceRequest>(dto);
             request.Status = "Pending";
+            request.CreatedBy = dto.UserId;
+
             _context.ServiceRequests.Add(request);
             await _context.SaveChangesAsync();
 
+            // REFRESH the data from DB to include Service and Location names
             var savedRequest = await _context.ServiceRequests
                 .Include(r => r.Service)
                 .Include(r => r.Location)
@@ -42,7 +44,6 @@ namespace SoftSolutions.Controllers
             return Ok(result);
         }
 
-        // ================= GET ALL =================
         [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetAll()
@@ -57,7 +58,6 @@ namespace SoftSolutions.Controllers
             return Ok(result);
         }
 
-        // ================= GET BY USER =================
         [AllowAnonymous]
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetByUser(int userId)
@@ -73,7 +73,29 @@ namespace SoftSolutions.Controllers
         }
 
         // ================= GET FOR PROVIDER =================
-        [AllowAnonymous]
+        //[AllowAnonymous]
+        //[HttpGet("provider/{providerId}")]
+        //public async Task<IActionResult> GetForProvider(int providerId)
+        //{
+        //    var providerServices = await _context.ProviderServices
+        //        .Where(p => p.ProviderId == providerId)
+        //        .Select(p => p.ServiceId)
+        //        .ToListAsync();
+
+        //    var requests = await _context.ServiceRequests
+        //        .Include(r => r.Service)
+        //        .Include(r => r.Location)
+        //        .Where(r =>
+        //            r.Status == "Pending"
+        //            && providerServices.Contains(r.ServiceId)
+        //        )
+        //        .ToListAsync();
+
+        //    var result = _mapper.Map<List<ServiceRequestResponseDTO>>(requests);
+        //    return Ok(result);
+        //}
+
+
         [HttpGet("provider/{providerId}")]
         public async Task<IActionResult> GetForProvider(int providerId)
         {
@@ -82,12 +104,18 @@ namespace SoftSolutions.Controllers
                 .Select(p => p.ServiceId)
                 .ToListAsync();
 
+            var providerLocations = await _context.ProviderLocations
+                .Where(p => p.ProviderId == providerId)
+                .Select(p => p.LocationId)
+                .ToListAsync();
+
             var requests = await _context.ServiceRequests
                 .Include(r => r.Service)
                 .Include(r => r.Location)
                 .Where(r =>
                     r.Status == "Pending"
                     && providerServices.Contains(r.ServiceId)
+                    && providerLocations.Contains(r.LocationId) // ← ADD
                 )
                 .ToListAsync();
 
@@ -95,7 +123,7 @@ namespace SoftSolutions.Controllers
             return Ok(result);
         }
 
-        // ================= UPDATE STATUS =================
+
         [AllowAnonymous]
         [HttpPut("{id}/status")]
         public async Task<IActionResult> UpdateStatus(int id, string status)
@@ -109,7 +137,6 @@ namespace SoftSolutions.Controllers
             return Ok("Status updated");
         }
 
-        // ================= UPDATE REQUEST =================
         [AllowAnonymous]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, ServiceRequestRequestDTO dto)
@@ -128,7 +155,6 @@ namespace SoftSolutions.Controllers
             return Ok(result);
         }
 
-        // ================= DELETE REQUEST =================
         [AllowAnonymous]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)

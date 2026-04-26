@@ -2,6 +2,7 @@
 {
     public class OrderResponseDTO
     {
+        public int Id { get; set; }
         public int ServiceRequestId { get; set; }
         public double? TotalAmount { get; set; }
         public decimal? CommissionPercentage { get; set; }

@@ -23,7 +23,6 @@ namespace SoftSolutions.Controllers
             _mapper = mapper;
         }
 
-        // ================= SEND MESSAGE =================
         [Authorize(Roles = "User,Provider")]
         [HttpPost]
         public async Task<IActionResult> SendMessage(MessageRequestDTO dto)
@@ -36,7 +35,6 @@ namespace SoftSolutions.Controllers
             return Ok(result);
         }
 
-        // ================= GET CHAT BY SERVICE REQUEST =================
         [Authorize(Roles = "User,Provider,Admin")]
         [HttpGet("request/{requestId}")]
         public async Task<IActionResult> GetChat(int requestId)
@@ -51,7 +49,6 @@ namespace SoftSolutions.Controllers
             return Ok(result);
         }
 
-        // ================= GET USER CHAT HISTORY =================
         [Authorize(Roles = "User,Provider,Admin")]
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetUserMessages(int userId)
@@ -66,7 +63,6 @@ namespace SoftSolutions.Controllers
             return Ok(result);
         }
 
-        // ================= GET ALL MESSAGES =================
         [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> GetAll()
@@ -80,7 +76,6 @@ namespace SoftSolutions.Controllers
             return Ok(result);
         }
 
-        // ================= UPDATE MESSAGE =================
         [Authorize(Roles = "User,Provider")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, MessageRequestDTO dto)
@@ -94,7 +89,6 @@ namespace SoftSolutions.Controllers
             return Ok(result);
         }
 
-        // ================= DELETE MESSAGE =================
         [Authorize(Roles = "User,Provider,Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)

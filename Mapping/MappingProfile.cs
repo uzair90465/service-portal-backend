@@ -26,10 +26,12 @@ namespace SoftSolutions.Mapping
 
             // ================= SERVICE =================
             CreateMap<Service, ServiceResponseDTO>()
-                .ForMember(dest => dest.CategoryName,
-                    opt => opt.MapFrom(src => src.Category.Name));
-
-            CreateMap<ServiceRequestDTO, Service>();
+     .ForMember(dest => dest.Id,
+         opt => opt.MapFrom(src => src.Id))
+     .ForMember(dest => dest.BasePrice,
+         opt => opt.MapFrom(src => (decimal?)src.BasePrice))
+     .ForMember(dest => dest.CategoryName,
+         opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : ""));
 
             // ================= PROVIDER PROFILE =================
             CreateMap<ProviderProfile, ProviderProfileResponseDTO>()
@@ -48,12 +50,11 @@ namespace SoftSolutions.Mapping
         opt => opt.MapFrom(src => src.Location.Name))
     .ForMember(dest => dest.UserId,
         opt => opt.MapFrom(src => src.UserId)); // ADD THIS LINE
-            CreateMap<ServiceRequestRequestDTO, ServiceRequest>();
+CreateMap<ServiceRequestRequestDTO, ServiceRequest>();
 
-            // ================= ORDER =================
-            CreateMap<Order, OrderResponseDTO>();
-            CreateMap<OrderRequestDTO, Order>();
-
+            CreateMap<Order, OrderResponseDTO>()
+      .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id));
+            CreateMap<OrderRequestDTO, Order>();  // ADD YE
             // ================= REVIEW =================
             CreateMap<Review, ReviewResponseDTO>();
             CreateMap<ReviewRequestDTO, Review>();

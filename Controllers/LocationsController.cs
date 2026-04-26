@@ -23,7 +23,6 @@ namespace SoftSolutions.Controllers
             _mapper = mapper;
         }
 
-        // ================= CREATE LOCATION =================
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> Create(LocationRequestDTO dto)
@@ -35,7 +34,6 @@ namespace SoftSolutions.Controllers
             return Ok(result);
         }
 
-        // ================= GET ALL =================
         [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetAll()
@@ -45,7 +43,6 @@ namespace SoftSolutions.Controllers
             return Ok(result);
         }
 
-        // ================= GET BY ID =================
         [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
@@ -57,7 +54,6 @@ namespace SoftSolutions.Controllers
             return Ok(result);
         }
 
-        // ================= UPDATE LOCATION =================
         [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, LocationRequestDTO dto)
@@ -71,7 +67,6 @@ namespace SoftSolutions.Controllers
             return Ok(result);
         }
 
-        // ================= DELETE LOCATION =================
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)

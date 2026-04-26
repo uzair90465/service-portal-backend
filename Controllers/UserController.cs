@@ -23,7 +23,6 @@ namespace SoftSolutions.Controllers
             _mapper = mapper;
         }
 
-        // ================= REGISTER =================
         [HttpPost("register")]
         public async Task<IActionResult> Register(UserRequestDTO dto)
         {
@@ -40,7 +39,6 @@ namespace SoftSolutions.Controllers
             return Ok(response);
         }
 
-        // ================= GET ALL =================
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -49,7 +47,6 @@ namespace SoftSolutions.Controllers
             return Ok(result);
         }
 
-        // ================= GET BY ID =================
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -60,7 +57,6 @@ namespace SoftSolutions.Controllers
             return Ok(result);
         }
 
-        // ================= UPDATE =================
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, UserRequestDTO dto)
         {
@@ -73,7 +69,6 @@ namespace SoftSolutions.Controllers
             return Ok(response);
         }
 
-        // ================= DELETE =================
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

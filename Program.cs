@@ -1,25 +1,17 @@
-
 using Microsoft.EntityFrameworkCore;
 using SoftSolutions.Database;
 using SoftSolutions.Mapping;
-
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ✅ DB Connection
 builder.Services.AddDbContext<DB>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SqlConnection")));
 
-// ✅ AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile));
-
-// ✅ Controllers
 builder.Services.AddControllers();
-
-// ✅ Swagger with JWT 🔐
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -32,7 +24,6 @@ builder.Services.AddSwaggerGen(c =>
         In = Microsoft.OpenApi.Models.ParameterLocation.Header,
         Description = "Enter JWT like: Bearer {your token}"
     });
-
     c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
     {
         {
@@ -49,7 +40,6 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// ✅ CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
@@ -59,7 +49,6 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader());
 });
 
-// ✅ 🔥 JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -72,35 +61,21 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidIssuer = "SoftSolutions",
             ValidAudience = "SoftSolutionsUsers",
             IssuerSigningKey = new SymmetricSecurityKey(
-    Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+                Encoding.UTF8.GetBytes("SoftSolutionsJwtKeyForAuthentication2024SecureKey"))
         };
     });
 
 var app = builder.Build();
 
-// ✅ Swagger
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-
-// ✅ CORS
 app.UseCors("AllowAll");
-
-app.Use(async (context, next) =>
-{
-    var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
-    Console.WriteLine($"Token received: {token ?? "NONE"}");
-    await next();
-});
-
-// ✅ 🔥 IMPORTANT ORDER
-app.UseAuthentication();   // 👈 FIRST
-app.UseAuthorization();    // 👈 SECOND
-
+app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllers();
-
 app.Run();

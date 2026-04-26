@@ -23,7 +23,6 @@ namespace SoftSolutions.Controllers
             _mapper = mapper;
         }
 
-        // ================= CREATE PROVIDER PROFILE =================
         [AllowAnonymous]
         [HttpPost("create-profile")]
         public async Task<IActionResult> CreateProfile(ProviderProfileRequestDTO dto)
@@ -40,7 +39,6 @@ namespace SoftSolutions.Controllers
             return Ok(result);
         }
 
-        // ================= ASSIGN SERVICES =================
         [AllowAnonymous]
         [HttpPost("assign-services")]
         public async Task<IActionResult> AssignServices(ProviderServiceRequestDTO dto)
@@ -58,7 +56,6 @@ namespace SoftSolutions.Controllers
             return Ok("Service assigned successfully");
         }
 
-        // ================= ASSIGN LOCATIONS =================
         [AllowAnonymous]
         [HttpPost("assign-locations")]
         public async Task<IActionResult> AssignLocations(ProviderLocationRequestDTO dto)
@@ -76,7 +73,6 @@ namespace SoftSolutions.Controllers
             return Ok("Location assigned successfully");
         }
 
-        // ================= GET PROVIDER BY USER ID =================
         [AllowAnonymous]
         [HttpGet("{userId}")]
         public async Task<IActionResult> GetProvider(int userId)
@@ -106,7 +102,6 @@ namespace SoftSolutions.Controllers
             return Ok(result);
         }
 
-        // ================= GET ALL PROVIDERS =================
         [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetAll()
@@ -118,7 +113,6 @@ namespace SoftSolutions.Controllers
             return Ok(result);
         }
 
-        // ================= UPDATE PROVIDER PROFILE =================
         [AllowAnonymous]
         [HttpPut("{userId}")]
         public async Task<IActionResult> UpdateProfile(int userId, ProviderProfileRequestDTO dto)
@@ -135,7 +129,6 @@ namespace SoftSolutions.Controllers
             return Ok(result);
         }
 
-        // ================= DELETE PROVIDER PROFILE =================
         [AllowAnonymous]
         [HttpDelete("{userId}")]
         public async Task<IActionResult> DeleteProfile(int userId)
@@ -150,7 +143,6 @@ namespace SoftSolutions.Controllers
             return Ok("Provider profile deleted");
         }
 
-        // ================= REMOVE ASSIGNED SERVICE =================
         [AllowAnonymous]
         [HttpDelete("remove-service/{providerId}/{serviceId}")]
         public async Task<IActionResult> RemoveService(int providerId, int serviceId)
@@ -165,7 +157,6 @@ namespace SoftSolutions.Controllers
             return Ok("Service removed");
         }
 
-        // ================= REMOVE ASSIGNED LOCATION =================
         [AllowAnonymous]
         [HttpDelete("remove-location/{providerId}/{locationId}")]
         public async Task<IActionResult> RemoveLocation(int providerId, int locationId)

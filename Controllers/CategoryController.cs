@@ -23,7 +23,7 @@ namespace SoftSolutions.Controllers
             _mapper = mapper;
         }
 
-        // ================= CREATE CATEGORY =================
+       
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> Create(CategoryRequestDTO dto)
@@ -35,7 +35,7 @@ namespace SoftSolutions.Controllers
             return Ok(result);
         }
 
-        // ================= GET ALL =================
+      
         [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetAll()
@@ -45,7 +45,7 @@ namespace SoftSolutions.Controllers
             return Ok(result);
         }
 
-        // ================= GET BY ID =================
+       
         [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
@@ -57,7 +57,7 @@ namespace SoftSolutions.Controllers
             return Ok(result);
         }
 
-        // ================= UPDATE CATEGORY =================
+        
         [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, CategoryRequestDTO dto)
@@ -71,7 +71,6 @@ namespace SoftSolutions.Controllers
             return Ok(result);
         }
 
-        // ================= DELETE CATEGORY =================
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
