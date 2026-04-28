@@ -7,6 +7,10 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// 1. FIX: Bind to the port Render provides
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+
 builder.Services.AddDbContext<DB>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SqlConnection")));
 
@@ -60,18 +64,21 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             ValidIssuer = "SoftSolutions",
             ValidAudience = "SoftSolutionsUsers",
+            // Industry way: Pull the key from configuration (Environment Variables)
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes("SoftSolutionsJwtKeyForAuthentication2024SecureKey"))
+    Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? "FallbackKeyForLocalDev"))
         };
     });
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+// 2. FIX: Enable Swagger in Production so the home page isn't a 404
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "SoftSolutions API V1");
+    c.RoutePrefix = string.Empty; // Makes Swagger the home page
+});
 
 app.UseCors("AllowAll");
 app.UseHttpsRedirection();
